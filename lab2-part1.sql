@@ -1,0 +1,33 @@
+
+  
+  
+CREATE TABLE BOOK
+(TITLE VARCHAR2(30),
+AUTHOR_FIRST_NAME VARCHAR2(50),
+AUTHOR_LAST_NAME VARCHAR2(50),
+ISBN_NUMBER VARCHAR2(13),
+DATE_PUBLISHED DATE);
+
+
+INSERT INTO BOOK 
+(TITLE, AUTHOR_LAST_NAME, AUTHOR_FIRST_NAME, ISBN_NUMBER, DATE_PUBLISHED)
+VALUES
+('To Kill a Mockingbird', 'Lee', 'Harper', '1234567891012', CAST('11-JUL-1960' AS DATE));
+
+
+select * from book;
+
+update book
+set ISBN_NUMBER = '1234567890'
+where TITLE = 'To Kill a Mockingbird';
+
+delete from BOOK;
+
+drop table BOOK;
+
+commit;
+
+
+
+
+
