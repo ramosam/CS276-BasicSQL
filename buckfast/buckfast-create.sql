@@ -169,7 +169,6 @@ CREATE TABLE BAPaycheck (
   Paycheck_ID number(10) not null,
   FK_Employee_ID varchar2(15) not null,
   FK_Payroll_ID number(10) not null,
-  Hours_Worked number(6,2) not null,
   Pay_Rate number(6,2) not null,
   PRIMARY KEY (Paycheck_ID),
   FOREIGN KEY (FK_Employee_ID) REFERENCES BAEmployee (Employee_ID),
