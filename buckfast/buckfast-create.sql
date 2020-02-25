@@ -1,31 +1,33 @@
+
 Drop table BACustomer_Address_Type cascade constraints;
 Drop table BACustomer cascade constraints;
 Drop table BACustomer_Address cascade constraints;
 Drop table BASale_Transaction cascade constraints;
 Drop table BAReservation cascade constraints;
-Drop table BASchedule cascade constraints;
 Drop table BAEmployee_Type cascade constraints;
 Drop table BAEmployee cascade constraints;
-Drop table BAShift cascade constraints;
+Drop table BAStore_Business_Type cascade constraints;
+Drop table BABusiness cascade constraints;
+Drop table BAStore_Entity cascade constraints;
 Drop table BAGuestHouse cascade constraints;
 Drop table BAGuestHouse_Room cascade constraints;
 Drop table BAGuestHouse_Reservation cascade constraints;
-Drop table BAStore_Business_Type cascade constraints;
-Drop table BAStore_Entity cascade constraints;
+Drop table BAAssigned_Schedule cascade constraints;
+Drop table BAShift cascade constraints;
 Drop table BAPayroll cascade constraints;
 Drop table BAPaycheck cascade constraints;
 Drop table BARestaurant_Reservation cascade constraints;
-Drop table BAStoreInventory cascade constraints;
+Drop table BASTORE_INVENTORY cascade constraints;
 Drop table BAProduct_Type cascade constraints;
 Drop table BAProduct cascade constraints;
 Drop table BAVendor cascade constraints;
-Drop table BAStoreInventory_LineItem cascade constraints;
+Drop table BASTORE_INVENTORY_LineItem cascade constraints;
 Drop table BATransaction_Line_Item cascade constraints;
 
 
-/*
-  Create the tables
-*/
+--------------------------------------------------------------------------------
+--------------------------------------CREATE------------------------------------
+--------------------------------------------------------------------------------
 
 
 CREATE TABLE BACustomer_Address_Type (
@@ -45,7 +47,7 @@ CREATE TABLE BACustomer_Address (
   Customer_Address_ID number(10) not null,
   Street_Address varchar2(100) not null,
   City varchar2(50) not null,
-  State varchar2(6) not null,
+  State varchar2(50) not null,
   Zipcode varchar2(20) not null,
   FK_Customer_ID varchar2(15) not null,
   FK_Customer_Address_Type_ID number(10) not null,
@@ -57,8 +59,7 @@ CREATE TABLE BACustomer_Address (
 CREATE TABLE BASale_Transaction (
   Sale_Transaction_ID number(10)  not null,
   FK_Customer_ID varchar2(15) not null,
-  TransactionDate Date not null,
-  Transaction_Amount number(8,2) not null,
+  Transaction_Date Date not null,
   PRIMARY KEY (Sale_Transaction_ID),
   FOREIGN KEY (FK_Customer_ID) REFERENCES BACustomer (Customer_ID)
 );
@@ -66,64 +67,63 @@ CREATE TABLE BASale_Transaction (
 CREATE TABLE BAReservation (
   Reservation_ID number(10) not null,
   FK_Customer_ID varchar2(15)  not null,
-  DateStart Date not null,
-  DateEnd Date not null,
-  Reservation_Price number(8,2) not null,
+  DATE_START Date not null,
+  DATE_END Date not null,
   PRIMARY KEY (Reservation_ID),
   FOREIGN KEY (FK_Customer_ID) REFERENCES BACustomer (Customer_ID)
 );
 
-CREATE TABLE BASchedule (
-  Schedule_ID number(10) not null,
-  StartDate Date not null,
-  EndDate Date not null,
-  PRIMARY KEY (Schedule_ID)
-);
-
 CREATE TABLE BAEmployee_Type (
-  Employee_Type_ID number(10),
-  Employee_Type_Name varchar2(100),
-  Employee_Type_Description varchar2(200),
+  Employee_Type_ID number(10) not null,
+  Employee_Type_Name varchar2(100) not null,
+  Employee_Type_Description varchar2(200) not null,
   PRIMARY KEY (Employee_Type_ID)
 );
 
 CREATE TABLE BAEmployee (
   Employee_ID varchar2(15) not null,
-  FK_Employee_Type_ID  not null,
+  FK_Employee_Type_ID number(10) not null,
+  First_Name varchar2(50) not null,
+  Last_Name varchar2(50) not null,
   PRIMARY KEY (Employee_ID),
   FOREIGN KEY (FK_Employee_Type_ID) REFERENCES BAEmployee_Type (Employee_Type_ID)
 );
 
-CREATE TABLE BAShift (
-  Shift_ID number(10) not null,
-  FK_Employee_ID varchar2(15) not null,
-  FK_Schedule_ID number(10) not null,
-  End_Time Date not null,
-  Shift_Date Date not null,
-  Start_Time Date not null,
-  PRIMARY KEY (Shift_ID),
-  FOREIGN KEY (FK_Employee_ID) REFERENCES BAEmployee (Employee_ID), 
-  FOREIGN KEY (FK_Schedule_ID) REFERENCES BASchedule (Schedule_ID)
+CREATE TABLE BAStore_Business_Type (
+  Store_Business_Type_ID number(4) not null,
+  Store_Business_Type_Name varchar2(100) not null,
+  Store_Business_Type_Descript varchar2(200) not null,
+  PRIMARY KEY (Store_Business_Type_ID)
+);
+
+CREATE TABLE BABUSINESS (
+  BUSINESS_ID varchar2(15), 
+  BUSINESS_NAME VARCHAR2(30) NOT NULL, 
+  BUSINESS_DESCRIPTION VARCHAR2(30) NOT NULL,
+  PRIMARY KEY (BUSINESS_ID)
+);
+
+CREATE TABLE BAStore_Entity (
+  Business_ID varchar2(15) not null,
+  FK_Store_Business_Type_ID number(4) not null,
+  PRIMARY KEY (Business_ID),
+  FOREIGN KEY (FK_Store_Business_Type_ID) REFERENCES BAStore_Business_Type (Store_Business_Type_ID)
 );
 
 CREATE TABLE BAGuestHouse (
-  GuestHouse_ID varchar(15) not null,
+  Business_ID varchar2(15) not null,
   Num_of_Room number(3) not null,
-  Max_Occupancy number(3) not null,
-  FK_Schedule_ID number(10) not null,
-  GuestHouse_Name varchar2(100) not null,
-  PRIMARY KEY (GuestHouse_ID), 
-  FOREIGN KEY (FK_Schedule_ID) REFERENCES BASchedule (Schedule_ID)
+  PRIMARY KEY (Business_ID)
 );
 
 CREATE TABLE BAGuestHouse_Room (
   GuestHouse_Room_ID varchar2(15) not null,
-  FK_GuestHouse_ID varchar2(15) not null,
+  FK_Business_ID varchar2(15) not null,
   Room_Name varchar2(50) not null,
   Room_Occupancy number(2) not null,
   Room_Price number(8,2) not null,
   PRIMARY KEY (GuestHouse_Room_ID),
-  FOREIGN KEY (FK_GuestHouse_ID) REFERENCES BAGuestHouse (GuestHouse_ID)
+  FOREIGN KEY (FK_Business_ID) REFERENCES BAGuestHouse (Business_ID)
 );
 
 CREATE TABLE BAGuestHouse_Reservation (
@@ -136,30 +136,33 @@ CREATE TABLE BAGuestHouse_Reservation (
   FOREIGN KEY (FK_Reservation_ID) REFERENCES BAReservation (Reservation_ID)
 );
 
-CREATE TABLE BAStore_Business_Type (
-  Store_Business_Type_ID number(4) not null,
-  Store_Business_Type_Name varchar2(100) not null,
-  Store_Business_Type_Descript varchar2(200) not null,
-  PRIMARY KEY (Store_Business_Type_ID)
+CREATE TABLE BAAssigned_Schedule (
+  ASSIGNED_SCHEDULE_ID NUMBER(10), 
+  FK_Business_ID varchar2(15),
+  START_DATE DATE NOT NULL, 
+  END_DATE DATE NOT NULL, 
+  PRIMARY KEY (ASSIGNED_SCHEDULE_ID),
+  FOREIGN KEY (FK_BUSINESS_ID) REFERENCES BABUSINESS (Business_ID)
 );
 
-CREATE TABLE BAStore_Entity (
-  Store_ID varchar2(15) not null,
-  FK_Schedule_ID number(10) not null,
-  Store_Name varchar2(100) not null,
-  FK_Store_Business_Type_ID number(4) not null,
-  PRIMARY KEY (Store_ID),
-  FOREIGN KEY (FK_Schedule_ID) REFERENCES BASchedule (Schedule_ID),
-  FOREIGN KEY (FK_Store_Business_Type_ID) REFERENCES BAStore_Business_Type (Store_Business_Type_ID)
+CREATE TABLE BAShift (
+  Shift_ID number(10) not null,
+  FK_Employee_ID varchar2(15) not null,
+  FK_Assigned_Schedule_ID number(10) not null,
+  Start_Date_Time DATE not null,
+  End_Date_Time DATE not null,
+  PRIMARY KEY (Shift_ID),
+  FOREIGN KEY (FK_Employee_ID) REFERENCES BAEmployee (Employee_ID), 
+  FOREIGN KEY (FK_Assigned_Schedule_ID) REFERENCES BAAssigned_Schedule (Assigned_Schedule_ID)
 );
 
 CREATE TABLE BAPayroll (
   Payroll_ID number(10) not null,
-  FK_Store_ID varchar2(15) not null,
-  PayPeriodStartDate Date not null,
-  PayPeriodEndDate Date not null,
+  FK_BUSINESS_ID varchar2(15) not null,
+  PayPeriod_START_DATE Date not null,
+  PayPeriod_END_DATE Date not null,
   PRIMARY KEY (Payroll_ID),
-  FOREIGN KEY (FK_Store_ID) REFERENCES BAStore_Entity (Store_ID)
+  FOREIGN KEY (FK_BUSINESS_ID) REFERENCES BAStore_Entity (Business_ID)
 );
 
 CREATE TABLE BAPaycheck (
@@ -174,22 +177,22 @@ CREATE TABLE BAPaycheck (
 );
 
 CREATE TABLE BARestaurant_Reservation (
-  Restaurant_Reservation_ID varchar(15) not null,
-  FK_Store_ID varchar2(15) not null,
+  Restaurant_Reservation_ID varchar2(15) not null,
+  FK_Business_ID varchar2(15) not null,
   FK_Reservation_ID number(10) not null,
   Num_of_Guests number(3) not null,
   PRIMARY KEY (Restaurant_Reservation_ID),
-  FOREIGN KEY (FK_Store_ID) REFERENCES BAStore_Entity (Store_ID),
+  FOREIGN KEY (FK_Business_ID) REFERENCES BAStore_Entity (Business_ID),
   FOREIGN KEY (FK_Reservation_ID) REFERENCES BAReservation (Reservation_ID)
 );
 
-CREATE TABLE BAStoreInventory (
-  StoreInventory_ID varchar(15) not null,
-  FK_Store_ID varchar(15) not null,
-  DateReceived Date  not null,
-  Shipment_Order varchar(20) not null,
-  PRIMARY KEY (StoreInventory_ID),
-  FOREIGN KEY (FK_Store_ID) REFERENCES BAStore_Entity (Store_ID)
+CREATE TABLE BASTORE_INVENTORY (
+  STORE_INVENTORY_ID varchar2(15) not null,
+  FK_BUSINESS_ID varchar2(15) not null,
+  DATE_RECEIVED Date  not null,
+  Shipment_Order varchar2(20) not null,
+  PRIMARY KEY (STORE_INVENTORY_ID),
+  FOREIGN KEY (FK_BUSINESS_ID) REFERENCES BAStore_Entity (Business_ID)
 );
 
 CREATE TABLE BAProduct_Type (
@@ -211,19 +214,19 @@ CREATE TABLE BAProduct (
 
 CREATE TABLE BAVendor (
   Vendor_ID varchar2(15) not null,
-  VendorName varchar2(100) not null,
+  VENDOR_NAME varchar2(100) not null,
   PRIMARY KEY (Vendor_ID)
 );
 
-CREATE TABLE BAStoreInventory_LineItem (
-  StoreInventory_LineItem_ID number(10) not null,
+CREATE TABLE BASTORE_INVENTORY_LineItem (
+  STORE_INVENTORY_LineItem_ID number(10) not null,
   FK_ProductID varchar2(15) not null,
-  FK_StoreInventory_ID varchar2(15) not null,
+  FK_STORE_INVENTORY_ID varchar2(15) not null,
   FK_Vendor_ID varchar2(15) not null,
   Quantity number(4) not null,
-  PRIMARY KEY (StoreInventory_LineItem_ID),
+  PRIMARY KEY (STORE_INVENTORY_LineItem_ID),
   FOREIGN KEY (FK_ProductID) REFERENCES BAProduct (Product_ID),
-  FOREIGN KEY (FK_StoreInventory_ID) REFERENCES BAStoreInventory (StoreInventory_ID),
+  FOREIGN KEY (FK_STORE_INVENTORY_ID) REFERENCES BASTORE_INVENTORY (STORE_INVENTORY_ID),
   FOREIGN KEY (FK_Vendor_ID) REFERENCES BAVendor (Vendor_ID)
 );
 
@@ -237,7 +240,4 @@ CREATE TABLE BATransaction_Line_Item (
   FOREIGN KEY (FK_Product_ID) REFERENCES BAProduct (Product_ID),
   FOREIGN KEY (FK_Sale_Transaction_ID) REFERENCES BASale_Transaction (Sale_Transaction_ID)
 );
-
-
-
 
