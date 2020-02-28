@@ -17,10 +17,11 @@ Drop table BAShift cascade constraints;
 Drop table BAPayroll cascade constraints;
 Drop table BAPaycheck cascade constraints;
 Drop table BARestaurant_Reservation cascade constraints;
-Drop table BASTORE_INVENTORY cascade constraints;
+Drop table BAStore_Inventory cascade constraints;
 Drop table BAProduct_Type cascade constraints;
 Drop table BAProduct cascade constraints;
 Drop table BAVendor cascade constraints;
+Drop table BAShipment cascade constraints;
 Drop table BASTORE_INVENTORY_LineItem cascade constraints;
 Drop table BATransaction_Line_Item cascade constraints;
 
@@ -96,7 +97,7 @@ CREATE TABLE BAStore_Business_Type (
   PRIMARY KEY (Store_Business_Type_ID)
 );
 
-CREATE TABLE BABUSINESS (
+CREATE TABLE BABusiness (
   BUSINESS_ID varchar2(15), 
   BUSINESS_NAME VARCHAR2(30) NOT NULL, 
   BUSINESS_DESCRIPTION VARCHAR2(30) NOT NULL,
@@ -107,13 +108,15 @@ CREATE TABLE BAStore_Entity (
   Business_ID varchar2(15) not null,
   FK_Store_Business_Type_ID number(4) not null,
   PRIMARY KEY (Business_ID),
+  foreign key (Business_ID) references BABusiness (Business_ID),
   FOREIGN KEY (FK_Store_Business_Type_ID) REFERENCES BAStore_Business_Type (Store_Business_Type_ID)
 );
 
 CREATE TABLE BAGuestHouse (
   Business_ID varchar2(15) not null,
   Num_of_Room number(3) not null,
-  PRIMARY KEY (Business_ID)
+  PRIMARY KEY (Business_ID),
+  foreign key (Business_ID) references BABusiness (Business_ID)
 );
 
 CREATE TABLE BAGuestHouse_Room (
@@ -185,11 +188,9 @@ CREATE TABLE BARestaurant_Reservation (
   FOREIGN KEY (FK_Reservation_ID) REFERENCES BAReservation (Reservation_ID)
 );
 
-CREATE TABLE BASTORE_INVENTORY (
+CREATE TABLE BAStore_Inventory (
   STORE_INVENTORY_ID varchar2(15) not null,
   FK_BUSINESS_ID varchar2(15) not null,
-  DATE_RECEIVED Date  not null,
-  Shipment_Order varchar2(20) not null,
   PRIMARY KEY (STORE_INVENTORY_ID),
   FOREIGN KEY (FK_BUSINESS_ID) REFERENCES BAStore_Entity (Business_ID)
 );
@@ -217,16 +218,24 @@ CREATE TABLE BAVendor (
   PRIMARY KEY (Vendor_ID)
 );
 
-CREATE TABLE BASTORE_INVENTORY_LineItem (
+CREATE TABLE BAShipment (
+  Shipment_ID varchar(15) not null, 
+  FK_Store_Inventory_ID varchar2(15) not null,
+  FK_Vendor_ID varchar2(15) not null, 
+  DATE_RECEIVED Date  not null,
+  PRIMARY KEY (SHIPMENT_ID),
+  FOREIGN KEY (FK_STORE_INVENTORY_ID) REFERENCES BASTORE_INVENTORY (STORE_INVENTORY_ID),
+  FOREIGN KEY (FK_VENDOR_ID) REFERENCES BAVENDOR (VENDOR_ID)
+);
+
+CREATE TABLE BAStore_Inventory_LineItem (
   STORE_INVENTORY_LineItem_ID number(10) not null,
   FK_ProductID varchar2(15) not null,
-  FK_STORE_INVENTORY_ID varchar2(15) not null,
-  FK_Vendor_ID varchar2(15) not null,
+  FK_Shipment_ID varchar2(15) not null,
   Quantity number(4) not null,
   PRIMARY KEY (STORE_INVENTORY_LineItem_ID),
   FOREIGN KEY (FK_ProductID) REFERENCES BAProduct (Product_ID),
-  FOREIGN KEY (FK_STORE_INVENTORY_ID) REFERENCES BASTORE_INVENTORY (STORE_INVENTORY_ID),
-  FOREIGN KEY (FK_Vendor_ID) REFERENCES BAVendor (Vendor_ID)
+  FOREIGN KEY (FK_Shipment_ID) REFERENCES BASHIPMENT (Shipment_ID)
 );
 
 CREATE TABLE BATransaction_Line_Item (
@@ -234,7 +243,6 @@ CREATE TABLE BATransaction_Line_Item (
   FK_Product_ID varchar2(15),
   FK_Sale_Transaction_ID number(10),
   Quantity number(4),
-  Price number(8,2),
   PRIMARY KEY (Transaction_Line_Item_ID),
   FOREIGN KEY (FK_Product_ID) REFERENCES BAProduct (Product_ID),
   FOREIGN KEY (FK_Sale_Transaction_ID) REFERENCES BASale_Transaction (Sale_Transaction_ID)
