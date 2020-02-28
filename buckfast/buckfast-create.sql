@@ -86,6 +86,7 @@ CREATE TABLE BAEmployee (
   FK_Employee_Type_ID number(10) not null,
   First_Name varchar2(50) not null,
   Last_Name varchar2(50) not null,
+  Hire_Date date not null,
   PRIMARY KEY (Employee_ID),
   FOREIGN KEY (FK_Employee_Type_ID) REFERENCES BAEmployee_Type (Employee_Type_ID)
 );
@@ -152,8 +153,8 @@ CREATE TABLE BAShift (
   Shift_ID number(10) not null,
   FK_Employee_ID varchar2(15) not null,
   FK_Assigned_Schedule_ID number(10) not null,
-  Start_Date_Time DATE not null,
-  End_Date_Time DATE not null,
+  Start_Date_Time TIMESTAMP not null,
+  End_Date_Time TIMESTAMP not null,
   PRIMARY KEY (Shift_ID),
   FOREIGN KEY (FK_Employee_ID) REFERENCES BAEmployee (Employee_ID), 
   FOREIGN KEY (FK_Assigned_Schedule_ID) REFERENCES BAAssigned_Schedule (Assigned_Schedule_ID)
@@ -248,3 +249,4 @@ CREATE TABLE BATransaction_Line_Item (
   FOREIGN KEY (FK_Sale_Transaction_ID) REFERENCES BASale_Transaction (Sale_Transaction_ID)
 );
 
+commit;
