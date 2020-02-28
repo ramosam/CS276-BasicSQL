@@ -229,12 +229,12 @@ CREATE TABLE BAShipment (
 );
 
 CREATE TABLE BAStore_Inventory_LineItem (
-  STORE_INVENTORY_LineItem_ID number(10) not null,
-  FK_ProductID varchar2(15) not null,
+  Store_Inventory_LineItem_ID number(10) not null,
+  FK_Product_ID varchar2(15) not null,
   FK_Shipment_ID varchar2(15) not null,
   Quantity number(4) not null,
-  PRIMARY KEY (STORE_INVENTORY_LineItem_ID),
-  FOREIGN KEY (FK_ProductID) REFERENCES BAProduct (Product_ID),
+  PRIMARY KEY (Store_Inventory_LineItem_ID),
+  FOREIGN KEY (FK_Product_ID) REFERENCES BAProduct (Product_ID),
   FOREIGN KEY (FK_Shipment_ID) REFERENCES BASHIPMENT (Shipment_ID)
 );
 
