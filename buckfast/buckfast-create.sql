@@ -249,4 +249,6 @@ CREATE TABLE BATransaction_Line_Item (
   FOREIGN KEY (FK_Sale_Transaction_ID) REFERENCES BASale_Transaction (Sale_Transaction_ID)
 );
 
+CREATE INDEX IX_CUSTOMER_LASTNAME ON BACUSTOMER (LAST_NAME);
+
 commit;
