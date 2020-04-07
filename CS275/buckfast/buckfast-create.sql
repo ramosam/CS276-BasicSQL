@@ -22,7 +22,7 @@ Drop table BAProduct_Type cascade constraints;
 Drop table BAProduct cascade constraints;
 Drop table BAVendor cascade constraints;
 Drop table BAShipment cascade constraints;
-Drop table BASTORE_INVENTORY_LineItem cascade constraints;
+Drop table BAStore_Inventory_LineItem cascade constraints;
 Drop table BATransaction_Line_Item cascade constraints;
 
 
