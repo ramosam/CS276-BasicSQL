@@ -30,4 +30,4 @@ begin
   end loop;
 end student_in_class_pt_1;
 
-execute student_in_class_pt_1;
+exec student_in_class_pt_1;
