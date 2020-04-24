@@ -34,7 +34,7 @@ begin
 
     update inventory
       set quantity_on_hand = quantity_on_hand - product_rec.purchased
-      where fk_prod_id = product_rec.prod_id;
+      where fk_product_id = product_rec.prod_id;
 
   end loop;
   dbms_output.put_line('===========================');
