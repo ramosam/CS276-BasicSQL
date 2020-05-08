@@ -9,11 +9,11 @@ create or replace package get_gpa
     (student_id         student.student_id%type,
     student_first_name  student.student_first_name%type,
     student_last_name   student.student_last_name%type,
-    student_type        student.student_type%type);
+    student_type        student.fk_student_type_id%type);
 
   --procedure to retrieve student information based upon the
   --student's id.
-  procedure get_student_info(student_id in varchar2, student_info_out  out student_info_rt);
+  procedure get_student_info(student_id_in in varchar2, student_info_out  out student_info_rt);
 
   --procedure to calculate the gpa of a student based upon
   --a student record
@@ -25,7 +25,7 @@ end get_gpa;
 create or replace package body get_gpa
   is
   --declaring the body of get_student_info.
-  procedure get_student_info(student_id_in in varchar2, student_info_out out student_info_rt)
+  procedure get_student_info(student_id_in in varchar2, student_info_out  out student_info_rt)
     is
       invalid_student_type exception; -- declaring an exception to handle issues when a student cannot be found
       pragma exception_init(invalid_student_type, -20001); -- creates an exception with the assigned numeric code.
@@ -36,14 +36,14 @@ create or replace package body get_gpa
       from student
       where student.student_id = student_id_in;
 
-      if student_info_out.student_type not in ('F', 'S'. 'J', 'R') then
+      if student_info_out.student_type not in ('F', 'S', 'J', 'R') then
         --if the student is not of a known type, raise exception
         raise invalid_student_type;
       end if;
     exception
       when invalid_student_type then
       dbms_output.put_line('Student type is invalid.');
-  end get_student_info;
+    end get_student_info;
 
   --declaring the body of calc_gpa.
   procedure calc_gpa(student_info_in in student_info_rt, gpa_out out number)
@@ -51,8 +51,8 @@ create or replace package body get_gpa
     cursor gpa_cur is
       select grade
       from enrollment
-      join section on enrollment.fk_section_id = section.fk_section_id
-      where enrollment.fk_student_id = student_id_in.student_id;
+      join section on enrollment.fk_section_id = section.section_id
+      where enrollment.fk_student_id = student_info_in.student_id;
 
     v_grade_points decimal(6,2);
 
@@ -74,9 +74,9 @@ create or replace package body get_gpa
           else v_grade_points := v_grade_points;
         end case;
       end loop;
-      gpa_out := v_grade_points / 4
-    end;
-  end calc_gpa;
+      gpa_out := v_grade_points / 4;
+    
+    end calc_gpa;
 end get_gpa;
 /
 
