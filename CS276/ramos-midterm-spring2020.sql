@@ -27,6 +27,8 @@ Over $750	12	Values
 
 
 */
+set serveroutput on;
+set feedback on;
 
 create or replace procedure calc_pledge_payment(pledge_amount_in in number, payment_amount out number)
   is
@@ -114,3 +116,94 @@ create or replace procedure update_double_donor_pledge(donor_id_in in pledge.idd
   exec update_double_donor_pledge(400, '08-OCT-12');
 
 
+/*
+3.	Examine the tables and fields in the Pledge database. Take a good look at 
+PLEDGE and PAYMENT tables.
+
+a.	Write a stored procedure that returns, in an OUT parameter, the count of 
+payments by a specific donor and the total of those payments. Test the procedure
+using iddonor = 302 for this exercise.
+
+b.	Now add an exception handler for a no data found error that outputs a message
+that no data was found. Test the exception handler with iddonor = 400.
+
+c.	Remember all programming code should be placed in the script file that you 
+upload to Moodle.
+
+*/
+
+create or replace procedure calc_num_payments_total_pledge_amt(donor_id_in IN number, num_pay_out OUT number, total_pledge_out OUT number)
+  is
+  v_num_pay number(4,0) := 0;
+  v_total_pledge number(8,2) := 0;
+  
+  NO_DATA_FOUND exception;
+  pragma exception_init (NO_DATA_FOUND, -20001);
+  
+  begin
+    select count(*) into v_num_pay
+    from pledge 
+    join payment on pledge.idpledge = payment.idpledge
+    where pledge.iddonor = donor_id_in;   
+    
+    if v_num_pay > 0 then
+      select sum(payment.payamt) into v_total_pledge from payment
+      join pledge on pledge.idpledge = payment.idpledge
+      where pledge.iddonor = donor_id_in;
+    else
+      raise NO_DATA_FOUND;
+    end if;
+    num_pay_out := v_num_pay;
+    total_pledge_out := v_total_pledge;
+
+  exception
+    when no_data_found then
+      dbms_output.put_line('There was no data found for this donor id.');
+    
+  end calc_num_payments_total_pledge_amt;
+  
+  
+declare
+  num_payments number := 0;
+  total_pledge number(8,2) := 0;
+begin
+  calc_num_payments_total_pledge_amt(302, num_payments, total_pledge);
+  dbms_output.put_line('Donor 302 has paid '|| num_payments ||' payments for a total of '|| total_pledge);
+  calc_num_payments_total_pledge_amt(400, num_payments, total_pledge);
+  dbms_output.put_line('Donor 400 has paid '|| num_payments ||' payments for a total of '|| total_pledge);
+end;
+
+
+/*
+4.	Start by examining the PLEDGE and STATUS tables. Use an explicit cursor to
+get the following information about all pledges, the ID of the pledge, its pledge
+amount and the status description for that pledge. Use a loop to output this
+information for all 13 pledges.  You can write an anonymous block or a stored 
+procedure. You don’t need to add any exception handling in this exericise.
+Remember all programming code should be placed in the script file that you upload
+to Moodle.
+*/
+
+declare
+  cursor pledge_info_cur 
+    is
+    select pledge.idpledge, pledge.pledgeamt, status.statusdesc 
+    from pledge
+    join status on status.idstatus = pledge.idstatus;
+  pledge_info_rt pledge_info_cur%rowtype;
+begin
+  dbms_output.put_line(' Pledge ID '||chr(9)||chr(9)||chr(9)||' Pledge AMT '||
+  chr(9)||chr(9)||' Description ');
+  dbms_output.put_line('------------------------------------------------');
+  open pledge_info_cur;
+  loop
+    fetch pledge_info_cur into pledge_info_rt;
+      exit when pledge_info_cur%notfound;
+      dbms_output.put_line(chr(9)||pledge_info_rt.idpledge||
+      chr(9)||chr(9)||chr(9)||
+      to_char(pledge_info_rt.pledgeamt, '$999G999G999D99')||
+      chr(9)||chr(9)||chr(9)||chr(9)||
+      pledge_info_rt.statusdesc);
+  end loop;
+  close pledge_info_cur;
+end;
